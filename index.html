@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>消しゴムバトルロイヤル | Eraser Battle Royale</title>
-<meta name="description" content="消しゴムを弾いて、最後の1人を目指せ！最大4人で遊べる無料ブラウザゲーム。CPU対戦・ローカル対戦対応。スマホでもPCでも楽しめる！">
+<meta name="description" content="消しゴムを弾いて、最後の1人を目指せ！最大4人で遊べる無料ブラウザゲーム。CPU・ローカル・オンラインのルーム対戦に対応。スマホでもPCでも楽しめる！">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://4guchi1q.github.io/eraser-battle-royale/">
 <meta property="og:site_name" content="4口一Q / Eraser Battle Royale">
 <meta property="og:title" content="消しゴムバトルロイヤル | Eraser Battle Royale">
-<meta property="og:description" content="机の上がバトル会場！消しゴムを弾いて相手を落とせ！最大4人のCPU・ローカル対戦に対応した無料ブラウザゲーム。スマホでもPCでも遊べる！">
+<meta property="og:description" content="机の上がバトル会場！消しゴムを弾いて相手を落とせ！最大4人のCPU・ローカル・オンライン対戦。スマホでもPCでも遊べる！">
 <meta property="og:image" content="https://4guchi1q.github.io/eraser-battle-royale/thumbnail.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -139,6 +139,27 @@
   .slotEmpty{padding:18px;color:#777;font-size:13px}
   .panel button:disabled{opacity:.65;cursor:default}
   @media(max-width:390px){.roster{gap:5px}.slotCard{padding:6px}.slotTop b{font-size:12px}}
+  #onlineHome .panel,#onlineLobby .panel{width:min(570px,100%);max-height:94dvh;overflow-y:auto}
+  .onlineFields{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left;margin:12px 0}
+  .onlineFields label,.onlineLabel{font-size:13px;font-weight:900;color:#51452e}
+  .onlineFields input,#joinCode,#onlineCpuNames input{display:block;width:100%;padding:12px 10px;background:#fffdf7;color:#242424;border:2px solid #a6987e;border-radius:8px;font-size:16px;min-width:0;margin-top:5px}
+  .panel .onlineFields button{margin:5px 0 0;font-size:14px;padding:10px 3px}
+  #joinCode{text-transform:uppercase;text-align:center;font-weight:1000;letter-spacing:.2em;font-size:20px;margin:10px 0}
+  .roomCode{font-size:clamp(28px,8vw,43px);letter-spacing:.12em;font-weight:1000;color:#163a62;background:#fffdf4;border:3px dashed #dec45a;border-radius:9px;padding:8px 12px;margin:8px auto;user-select:all}
+  .onlineNotice{font-size:13px;font-weight:800;color:#75531d;min-height:20px;line-height:1.6;margin:7px 0}
+  #onlineRoster{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left;margin:12px 0}
+  .onlineSeat{background:#fffdf4;border:2px solid #c4b59b;border-radius:8px;padding:10px;font-size:13px;min-width:0;overflow-wrap:anywhere}
+  .onlineSeat b{display:block;color:#3c311f;margin-bottom:3px}
+  .onlineSeat.me{border-color:#3e94cc;background:#e7f6ff}
+  .onlineSeat.cpu{border-color:#c69b4d}
+  .onlineOptions{display:flex;align-items:center;gap:10px;justify-content:space-between;background:#fff9e9;padding:9px;border:1px solid #cfbd9e;border-radius:8px;margin:7px 0}
+  .panel .onlineOptions button{width:44px;margin:0;padding:6px;font-size:17px}
+  .onlineOptions select{padding:8px;max-width:65%;font-size:14px;border:2px solid #bc9c63;border-radius:8px;background:white}
+  #onlineCpuNames{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0}
+  #onlineCpuNames label{text-align:left;font-size:12px}
+  #onlineCpuNames input{margin-top:2px;padding:7px;font-size:13px}
+  #onlineIndicator{display:none;position:fixed;z-index:8;left:50%;top:max(58px,calc(env(safe-area-inset-top) + 54px));transform:translateX(-50%);background:#142f46de;color:#fff;border:1px solid #add9f9;border-radius:9px;padding:5px 10px;font-size:11px;font-weight:900;white-space:nowrap;pointer-events:none}
+  @media(max-width:470px){.onlineFields{grid-template-columns:1fr}.onlineOptions{font-size:13px}#onlineRoster{gap:5px}.onlineSeat{padding:7px;font-size:11px}}
   /* 縦持ちスマートフォン向け。メニューはスクロール可能にする。 */
   @media (max-width:600px) and (orientation:portrait){
     #game{height:100dvh;touch-action:none}
@@ -160,14 +181,25 @@
 <body>
 <canvas id="game"></canvas>
 <noscript><div style="position:fixed;inset:0;z-index:100;background:#222;color:#fff;padding:30px;font-size:18px">このゲームにはJavaScriptが必要です。</div></noscript>
-<section class="overlay" id="menu"><div class="panel"><div class="crown">♛</div><h1>消しゴム<br><em>バトルロイヤル</em></h1><div class="english">ERASER BATTLE ROYALE</div><button id="mode">▶ START</button><button class="secondary" id="langSwitch" style="font-size:14px">🌐 日本語 / English</button><button class="secondary" id="rulesBtn">▤ ルール説明</button></div></section>
+<section class="overlay" id="menu"><div class="panel"><div class="crown">♛</div><h1>消しゴム<br><em>バトルロイヤル</em></h1><div class="english">ERASER BATTLE ROYALE</div><button id="mode">▶ START</button><button id="onlineMode">🌐 オンライン対戦</button><button class="secondary" id="langSwitch" style="font-size:14px">🌐 日本語 / English</button><button class="secondary" id="rulesBtn">▤ ルール説明</button></div></section>
+<section class="overlay" id="onlineHome" hidden><div class="panel"><h2>🌐 オンライン対戦</h2><div class="menuSubtitle">友達とルームコードで対戦。1端末につき1人、最大4人。</div>
+  <div class="onlineFields"><label>自分の名前<input id="onlineName" maxlength="16" placeholder="名前（空欄でおまかせ）"></label><label>自分の能力<button type="button" id="onlineAbility">🚫 能力なし ↻</button></label></div>
+  <button id="createRoom">＋ ルームを作成</button><div class="onlineLabel">ルームコードで参加</div><input id="joinCode" maxlength="8" spellcheck="false" autocapitalize="characters" placeholder="XXXXXXXX"><button id="joinRoom">→ ルームに参加</button>
+  <div id="onlineConnectStatus" class="onlineNotice" role="status"></div><button class="secondary" id="onlineHomeBack">⌂ タイトルに戻る</button>
+</div></section>
+<section class="overlay" id="onlineLobby" hidden><div class="panel"><h2>⚡ オンラインルーム</h2><div id="onlineRoomCode" class="roomCode">────────</div><button id="copyRoom">🔗 招待リンクをコピー</button><div id="onlineLobbyStatus" class="onlineNotice" role="status"></div>
+  <div class="onlineFields"><label>自分の名前<input id="onlineLobbyName" maxlength="16"></label><label>自分の能力<button type="button" id="onlineLobbyAbility">🚫 能力なし ↻</button></label></div>
+  <div id="onlineRoster"></div><div id="onlineHostOptions"><div class="onlineOptions"><strong>CPUを追加</strong><button type="button" id="cpuMinus">－</button><b id="onlineCpuCount">0</b><button type="button" id="cpuPlus">＋</button></div>
+  <div class="onlineOptions"><strong>ステージ</strong><select id="onlineStage"><option value="0">StandardArena</option><option value="1">PencaStadium</option><option value="2">CarvingColiseum</option></select></div><div id="onlineCpuNames"></div><button id="onlineStart">▶ 対戦スタート！</button></div>
+  <button class="secondary" id="onlineLeave">← ルームから退出</button>
+</div></section>
 <section class="overlay" id="select" hidden><div class="panel"><h2>⚡ 対戦メニュー</h2><div class="menuSubtitle">プレイヤー・ステージ・能力を決めよう！</div>
 <div id="roster" class="roster"></div><strong class="stageLabel">▣ ステージ選択</strong><div class="stageChoices">
 <button data-stage="0" class="chosen"><span class="stageThumb thumb0"></span><span>おわりのコロシアム<small>シンプルな木の机</small></span></button>
 <button data-stage="1"><span class="stageThumb thumb1"></span><span>ふでばこスタジアム<small>中央に筆箱がある長方形の机</small></span></button>
 <button data-stage="2"><span class="stageThumb thumb2"></span><span>ちょうこくとうぎじょう<small>端が三角形に欠けた緑の机</small></span></button>
 </div><button class="start" id="startGame">▶ 対戦スタート！</button><button class="secondary" data-back>タイトルに戻る</button></div></section>
-<section class="overlay" id="rules" hidden><div class="panel"><h2>▤ ルール説明</h2><p>同じ端末を交代で操作できるローカル対戦！机から相手の消しゴムを落とし、最後の1人になれば勝利！<br>机をタップ／クリックして狙いを決め、長押しでパワーをためます。離すとデコピン！<br>ゲージは0％から100％へ上昇し、満タンで即0％に戻ります。0％と100％は特殊な威力です。<br>強く弾くと自分が落ちることも。敗北後はCPU戦を8倍速で観戦するか、スキップできます。<br><br><b>【能力】</b><br>対戦メニューで能力を選べます。自分のターン中に画面の能力マークを押すと発動し、1試合に1回だけ使えます。<br>🚫 能力なし：通常対戦。<br>🛡️ バリア：青い球状の盾で敵を跳ね返し、次の自分のターンまで持続。<br>🕒 時間停止：5秒間、何度でもデコピン可能。中央に残り時間を表示。<br>💣 爆発：周囲の敵を吹き飛ばしますが、爆発そのものでは落とせません。<br><strong>すべてのステージで1位になると……？</strong></p><button class="secondary" data-back>戻る</button></div></section>
+<section class="overlay" id="rules" hidden><div class="panel"><h2>▤ ルール説明</h2><p>同じ端末を交代で操作できるローカル対戦！机から相手の消しゴムを落とし、最後の1人になれば勝利！<br>机をタップ／クリックして狙いを決め、長押しでパワーをためます。離すとデコピン！<br>ゲージは0％から100％へ上昇し、満タンで即0％に戻ります。0％と100％は特殊な威力です。<br>強く弾くと自分が落ちることも。敗北後はCPU戦を8倍速で観戦するか、スキップできます。<br><br><b>【能力】</b><br>対戦メニューで能力を選べます。自分のターン中に画面の能力マークを押すと発動し、1試合に1回だけ使えます。<br>🚫 能力なし：通常対戦。<br>🛡️ バリア：青い球状の盾で敵を跳ね返し、次の自分のターンまで持続。<br>🕒 時間停止：5秒間、何度でもデコピン可能。中央に残り時間を表示。<br>💣 爆発：周囲の敵を吹き飛ばしますが、爆発そのものでは落とせません。<br><strong>すべてのステージで1位になると……？</strong></p><p>オンライン対戦では、1端末につき1人が参加。ルームコードで友達を招待し、自分のターンに操作します。ホストがステージとCPUを決めます。</p><button class="secondary" data-back>戻る</button></div></section>
 <div id="ui">
   <div class="top">
     <div class="turn" id="turn">TURN 1</div>
@@ -178,6 +210,7 @@
   <div id="endActions"><button id="again">↻ もう一度遊ぶ</button><button id="changeCount">⚙ 対戦メニュー画面へ</button><button id="returnTitle">⌂ タイトルに戻る</button></div>
   <div id="hint">あなたのターン：消しゴムをタップして、後ろへスワイプ！</div>
 </div>
+<div id="onlineIndicator"></div>
 <script>
 (() => {
 const englishStageNames=['StandardArena','PencaStadium','CarvingColiseum'];
@@ -206,7 +239,12 @@ const translations={
 '引き分け！':'Draw!','全員が机から落ちた！':'Everyone fell off!','全員を机から追い出した！':'You knocked everyone off!',
 '長押しでパワー上昇！100%で即0%に戻る！':'Hold to charge! Power resets after 100%!',
 '爆発後もあなたのターン！':'Your turn continues after the explosion!',
-'マスター・サトケシ':'SATOKESHI','センセイ・アイザワ':'SENSERASER','キング・カス':'KING・KASU'
+'マスター・サトケシ':'SATOKESHI','センセイ・アイザワ':'SENSERASER','キング・カス':'KING・KASU',
+'🌐 オンライン対戦':'🌐 Online Battle','友達とルームコードで対戦。1端末につき1人、最大4人。':'Play with friends using a room code. One player per device, up to four.',
+'自分の名前':'Your Name','自分の能力':'Your Ability','＋ ルームを作成':'＋ Create Room','ルームコードで参加':'Join with Room Code',
+'→ ルームに参加':'→ Join Room','⌂ タイトルに戻る':'⌂ Back to Title','⚡ オンラインルーム':'⚡ Online Room',
+'🔗 招待リンクをコピー':'🔗 Copy Invite Link','CPUを追加':'Add CPUs','ステージ':'Stage','← ルームから退出':'← Leave Room'
+,'オンライン対戦では、1端末につき1人が参加。ルームコードで友達を招待し、自分のターンに操作します。ホストがステージとCPUを決めます。':'For online play, one player joins per device. Invite friends with a room code and play on your own turn. The host chooses the stage and CPUs.'
 };
 const englishAbilities=['None','Shield','Time Stop','Explosion'];
 let lang=(navigator.language||'ja').toLowerCase().startsWith('ja')?'ja':'en';
@@ -225,7 +263,7 @@ function localizeStatic(){
  document.getElementById('langSwitch').textContent=lang==='ja'?'🌐 日本語 / English':'🌐 English / 日本語';
  document.getElementById('useAbility').setAttribute('aria-label',lang==='en'?'Activate ability':'能力を発動');
 }
-document.getElementById('langSwitch').onclick=()=>{lang=lang==='ja'?'en':'ja';localizeStatic();renderRoster();};
+document.getElementById('langSwitch').onclick=()=>{lang=lang==='ja'?'en':'ja';localizeStatic();renderRoster();onlineRefreshText();};
 const canvas=document.getElementById('game');let ctx=canvas.getContext('2d',{alpha:false});
 const boardCache=document.createElement('canvas');let boardCacheValid=false,boardCacheStage=-1,boardCacheW=0,boardCacheH=0;
 const classroom=new Image();
@@ -278,6 +316,13 @@ let selectedAbility=0, activeAbility=0, abilityUsed=false, barrier=false, timeSt
 const slots=[{type:'1P',name:'',ability:0},{type:'CPU',name:'',ability:0},{type:'CPU',name:'',ability:0},{type:'CPU',name:'',ability:0}];
 const slotTypes=[['1P'],['CPU','2P'],['CPU','3P','なし'],['CPU','4P','なし']];
 let selectedSlots=null;
+// WebRTCの接続は1端末につき1人。進行・物理演算・CPUはホストだけで実行する。
+const online={mode:'off',peer:null,conn:null,code:'',people:new Map(),myIndex:0,
+  inMatch:false,name:'',ability:0,cpuCount:0,cpuNames:['','','',''],stage:0,
+  generation:0,lastStateSent:0,latestRoom:null};
+const onlineIsGuest=()=>online.mode==='guest';
+const onlineIsHost=()=>online.mode==='host';
+function canControl(e){return human(e)&&e.alive&&(!online.inMatch||(e.id===online.myIndex&&online.mode!=='off'));}
 function human(e){return e&&!e.ai}
 function activePlayer(){return erasers[current]}
 function updatePlayerAbility(){
@@ -312,8 +357,8 @@ function renderRoster(){
 const useAbility=document.getElementById('useAbility');
 function abilityUI(){
  const e=activePlayer();const a=abilities[e?.ability||0];useAbility.textContent=a.icon;useAbility.title=tr(a.name);
- const available=human(e)&&a!==abilities[0]&&!e.abilityUsed&&e.alive&&phase==='aim';
- useAbility.style.display=(phase==='finished'||phase==='menu'||!human(e)||a===abilities[0])?'none':'block';
+ const available=canControl(e)&&a!==abilities[0]&&!e.abilityUsed&&phase==='aim';
+ useAbility.style.display=(phase==='finished'||phase==='menu'||!canControl(e)||a===abilities[0])?'none':'block';
  useAbility.disabled=!available;useAbility.style.opacity=available?'1':'.45';
 }
 let kingShotPending=false;
@@ -337,6 +382,7 @@ function applyExplosion(origin, peak=13.5, rangeScale=1.45, label='BOOM!'){
   }
 }
 function usePower(){
+ if(onlineIsGuest()){if(canControl(activePlayer())&&phase==='aim')onlineSend({t:'ability',turn:turnNo});return;}
  const self=activePlayer();if(!human(self)||!self.alive||self.ability===0||self.abilityUsed||phase!=='aim')return;
  self.abilityUsed=true;updatePlayerAbility();aim=null;
  if(activeAbility===1){self.barrier=true;barrier=true;fx.push({text:'BARRIER!',age:0,x:self.x,y:self.y-40});}
@@ -470,7 +516,7 @@ function insideEraser(e,x,y){
   return (dx*dx+dy*dy)<(e.r*1.55)**2;
 }
 function pointerDown(x,y){
-  if((phase!=='aim' && !(timeStop>0 && phase==='moving'))||!human(activePlayer())||!activePlayer().alive)return;
+  if((phase!=='aim' && !(timeStop>0 && phase==='moving'))||!canControl(activePlayer()))return;
   const e=activePlayer();
   let dx=e.x-x,dy=e.y-y,len=Math.hypot(dx,dy);
   if(len<12){dx=0;dy=-1;len=1}
@@ -485,12 +531,21 @@ function pointerMove(x,y){
 function pointerUp(){
   if(!aim)return;
   const a=aim;aim=null;
-  const pct=a.power; frozenPower=pct;
+ if(onlineIsGuest()){
+   if(canControl(activePlayer())){frozenPower=a.power;onlineSend({t:'shot',turn:turnNo,nx:a.nx,ny:a.ny,pct:a.power});}
+   return;
+ }
+ fireChargedShot(a.nx,a.ny,a.power);
+}
+function fireChargedShot(nx,ny,pct){
+  if(!canControl(activePlayer())&&!(onlineIsHost()&&human(activePlayer())))return;
+  pct=Math.max(0,Math.min(1,pct));
+  frozenPower=pct;
   const special=pct<=.0001?'miss':pct>=.9999?'critical':null;
   const power=special==='miss'?.28*1.3:special==='critical'?22*1.3:(2.3+11.2*pct)*1.2*1.3;
   if(special){fx.push({text:special==='miss'?'スカッ…':'PERFECT!!',age:0,x:activePlayer().x,y:activePlayer().y-45});hitstop=special==='critical'?.38:.26;}
   explosionAimReturn=false; // 爆発後に通常攻撃したら追加ターンは発生しない
-  shoot(activePlayer(),a.nx,a.ny,power);
+  shoot(activePlayer(),nx,ny,power);
   // 時間停止中も物理演算は継続。追加のフリックをいつでも受け付ける。
 }
 canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture?.(e.pointerId);const p=pointerToWorld(e);pointerDown(p.x,p.y)});
@@ -498,6 +553,7 @@ canvas.addEventListener('pointermove',e=>{const p=pointerToWorld(e);pointerMove(
 canvas.addEventListener('pointerup',pointerUp);
 canvas.addEventListener('pointercancel',()=>aim=null);
 skip.addEventListener('click',()=>{
+  if(online.mode!=='off')return;
   if(erasers.some(e=>e.alive&&!e.ai)||phase==='finished')return;
   // スキップはCPU戦の物理シミュレーションを行わず、残存CPUから勝者を確定する
   const survivors=erasers.filter(e=>e.alive);
@@ -505,6 +561,7 @@ skip.addEventListener('click',()=>{
 
 });
 function lossControls(){
+  if(online.mode!=='off')return;
   if(!erasers.some(e=>e.alive&&!e.ai)&&phase!=='finished'&&phase!=='menu'){
     fastForward=true;
     skip.style.display='block';
@@ -606,22 +663,24 @@ function nextTurn(){
 }
 function finish(e){
   if(phase==='finished')return;
-  if(e&&!e.ai)stageWins.add(stage);
+  if(e&&!e.ai&&(online.mode==='off'||e.id===online.myIndex))stageWins.add(stage);
   phase='finished';kingShotPending=false;explosionAimReturn=false;satokeTimer=0;timeStop=0;barrier=false;winner=e||null; aim=null; frozenPower=null; skip.style.display='none'; fastForward=false;
   for(const item of erasers){item.vx=0;item.vy=0;item.air=0;}
-  statusEl.textContent=!e?tr('引き分け！'):!e.ai?'YOU WIN! 🎉':(lang==='en'?`${tr(e.name)} wins!`:`${e.name} の勝ち！`);
+  statusEl.textContent=!e?tr('引き分け！'):(online.mode!=='off'?(e.id===online.myIndex?'YOU WIN! 🎉':(lang==='en'?`${tr(e.name)} wins!`:`${e.name} の勝ち！`)):!e.ai?'YOU WIN! 🎉':(lang==='en'?`${tr(e.name)} wins!`:`${e.name} の勝ち！`));
   statusEl.style.opacity=1;
   hintEl.textContent=!e?tr('全員が机から落ちた！'):!e.ai?tr('全員を机から追い出した！'):(lang==='en'?`Last eraser standing: ${tr(e.name)}!`:'最後まで残ったのは '+e.name+'！');
   document.getElementById('endActions').style.display='flex';abilityUI();
 }
-again.onclick=()=>init(cpuCount,stage);
+again.onclick=()=>{if(onlineIsHost()){onlineHostStart();return;}if(onlineIsGuest())return;init(cpuCount,stage);};
 document.getElementById('returnTitle').onclick=()=>{
+  if(online.mode!=='off'){onlineLeave();return;}
   gameToken++;kingShotPending=false;explosionAimReturn=false; phase='menu'; aim=null; hitstop=0; fastForward=false; frozenPower=null;
   skip.style.display='none'; document.getElementById('endActions').style.display='none';
   statusEl.style.opacity=0; document.getElementById('select').hidden=true;
   document.getElementById('rules').hidden=true; document.getElementById('menu').hidden=false;
 };
 document.getElementById('changeCount').onclick=()=>{
+  if(online.mode!=='off'){onlineReturnLobby();return;}
   gameToken++;kingShotPending=false;explosionAimReturn=false; phase='menu'; aim=null; hitstop=0; fastForward=false;
   skip.style.display='none'; document.getElementById('endActions').style.display='none';
   statusEl.style.opacity=0; document.getElementById('select').hidden=false;syncSetup();
@@ -1015,12 +1074,13 @@ function loop(t){
     if(aim.lastCycle!==undefined&&Math.floor(cycle)>aim.lastCycle){aim.power=1;}
     aim.lastCycle=Math.floor(cycle);
   }
-  if(satokeTimer>0)satokeTimer=Math.max(0,satokeTimer-dt);
-  if(timeStop>0){
+  if(!onlineIsGuest()&&satokeTimer>0)satokeTimer=Math.max(0,satokeTimer-dt);
+  if(!onlineIsGuest()&&timeStop>0){
     timeStop=Math.max(0,timeStop-dt);
     if(timeStop===0){timeStopEndPending=true;if(phase==='aim'){timeStopEndPending=false;} }
   }
-  if(hitstop>0){hitstop=Math.max(0,hitstop-dt);}
+  if(onlineIsGuest()){}
+  else if(hitstop>0){hitstop=Math.max(0,hitstop-dt);}
   // 能力中も全員の速度・衝突・摩擦を通常通り計算する。
   else if(phase==='moving'){
     for(let n=0;n<(fastForward?8:1);n++){physics(dt);if(erasers.filter(e=>e.alive).length<=1)break;}
@@ -1035,11 +1095,390 @@ function loop(t){
     }
     }
   }
-  for(const f of falls){f.age+=dt*(fastForward?4:1);f.x+=f.vx*dt*28;f.y+=f.vy*dt*28;}
-  falls=falls.filter(f=>f.age<.8);
-  for(const f of fx)f.age+=hitstop>0?0:dt;fx=fx.filter(f=>f.age<1.15);
-  lossControls();updateUI();abilityUI();render();requestAnimationFrame(loop);
+  if(!onlineIsGuest()){
+    for(const f of falls){f.age+=dt*(fastForward?4:1);f.x+=f.vx*dt*28;f.y+=f.vy*dt*28;}
+    falls=falls.filter(f=>f.age<.8);
+    for(const f of fx)f.age+=hitstop>0?0:dt;fx=fx.filter(f=>f.age<1.15);
+    lossControls();
+    if(onlineIsHost()&&online.inMatch&&t-online.lastStateSent>=50){onlineBroadcastState();online.lastStateSent=t;}
+  }
+  updateUI();abilityUI();render();requestAnimationFrame(loop);
 }
+
+// ===== ONLINE ROOM (PeerJS / WebRTC) =====
+const onlineHomeEl=document.getElementById('onlineHome'),onlineLobbyEl=document.getElementById('onlineLobby');
+const onlineNameInput=document.getElementById('onlineName'),onlineLobbyNameInput=document.getElementById('onlineLobbyName');
+const onlineLobbyStatus=document.getElementById('onlineLobbyStatus');
+const onlineIndicator=document.getElementById('onlineIndicator');
+let onlinePeerLibraryPromise=null;
+function onlineLoadPeer(){
+  if(typeof Peer==='function')return Promise.resolve(true);
+  if(!onlinePeerLibraryPromise)onlinePeerLibraryPromise=new Promise(resolve=>{
+    const script=document.createElement('script');
+    script.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
+    script.async=true;
+    script.onload=()=>{const ok=typeof Peer==='function';if(!ok)onlinePeerLibraryPromise=null;resolve(ok);};
+    script.onerror=()=>{onlinePeerLibraryPromise=null;resolve(false);};
+    document.head.appendChild(script);
+  });
+  return onlinePeerLibraryPromise;
+}
+function onlineMsg(ja,en){return lang==='ja'?ja:en;}
+function onlineNotice(message,home=false){
+  (home?document.getElementById('onlineConnectStatus'):onlineLobbyStatus).textContent=message;
+}
+function onlineShow(which){
+  for(const id of ['menu','select','rules','onlineHome','onlineLobby'])document.getElementById(id).hidden=(id!==which);
+}
+function onlineRefreshText(){
+  const abilityText=abilities[online.ability].icon+' '+tr(abilities[online.ability].name)+' ↻';
+  document.getElementById('onlineAbility').textContent=abilityText;
+  document.getElementById('onlineLobbyAbility').textContent=abilityText;
+  onlineNameInput.placeholder=onlineMsg('名前（空欄でおまかせ）','Name (random if blank)');
+  onlineLobbyNameInput.placeholder=onlineNameInput.placeholder;
+  if(document.activeElement!==onlineNameInput)onlineNameInput.value=online.name;
+  if(document.activeElement!==onlineLobbyNameInput)onlineLobbyNameInput.value=online.name;
+  if(online.mode!=='off')onlineRenderLobby();
+}
+onlineNameInput.oninput=()=>{online.name=onlineValidName(onlineNameInput.value);};
+function onlineValidName(raw){return String(raw||'').trim().slice(0,16);}
+function onlineBeginSession(){
+  online.generation++;
+  const old=online.peer;
+  online.peer=null;online.conn=null;online.people.clear();
+  online.inMatch=false;online.mode='off';online.latestRoom=null;online.myIndex=0;
+  onlineIndicator.style.display='none';
+  if(old&&!old.destroyed){try{old.destroy();}catch(_){}}
+}
+function onlineLeave(){
+  if(onlineIsHost())onlineSendAll({t:'closed'});
+  onlineBeginSession();gameToken++;aim=null;phase='menu';hitstop=0;fastForward=false;
+  skip.style.display='none';document.getElementById('endActions').style.display='none';statusEl.style.opacity=0;
+  onlineShow('menu');
+  onlineRestoreLocalSlots();onlineRefreshText();
+  document.getElementById('changeCount').textContent=tr('⚙ 対戦メニュー画面へ');
+}
+let onlineLocalSlotBackup=null;
+function onlineRestoreLocalSlots(){
+  if(!onlineLocalSlotBackup)return;
+  onlineLocalSlotBackup.forEach((s,i)=>Object.assign(slots[i],s));
+  onlineLocalSlotBackup=null;
+}
+function onlineSaveLocalSlots(){
+  if(!onlineLocalSlotBackup)onlineLocalSlotBackup=slots.map(s=>({...s}));
+}
+function onlineRandomCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const values=new Uint8Array(8);
+  crypto.getRandomValues(values);
+  return Array.from(values,v=>chars[v%chars.length]).join('');
+}
+function onlinePeerId(code){return 'ebr-v39-'+code.toLowerCase();}
+function onlineStartProfile(){
+  online.name=onlineValidName(onlineNameInput.value)||((lang==='en'?englishNames:names)[Math.floor(Math.random()*(lang==='en'?englishNames:names).length)]);
+  onlineLobbyNameInput.value=online.name;
+}
+function onlineFail(message){
+  onlineBeginSession();onlineShow('onlineHome');onlineNotice(message,true);
+}
+function onlineCreateRoom(){
+  if(typeof Peer!=='function'){
+    const generation=online.generation;
+    onlineNotice(onlineMsg('接続の準備中…','Preparing connection…'),true);
+    onlineLoadPeer().then(ok=>{
+      if(generation!==online.generation||onlineHomeEl.hidden)return;
+      if(ok)onlineCreateRoom();
+      else onlineNotice(onlineMsg('通信ライブラリを読み込めません。ネット接続を確認してください。','Cannot load network library. Check your connection.'),true);
+    });return;
+  }
+  onlineSaveLocalSlots();onlineStartProfile();onlineBeginSession();
+  const generation=online.generation;
+  online.mode='host';online.code=onlineRandomCode();online.cpuCount=0;online.stage=selectedStage;
+  onlineNotice(onlineMsg('ルームを作成中…','Creating room…'),true);
+  const peer=new Peer(onlinePeerId(online.code));online.peer=peer;
+  peer.on('open',()=>{
+    if(generation!==online.generation)return;
+    onlineShow('onlineLobby');onlinePublishLobby();
+  });
+  peer.on('connection',conn=>{
+    if(generation!==online.generation||!onlineIsHost()){conn.close();return;}
+    conn.on('open',()=>{
+      if(generation!==online.generation)return;
+      if(online.inMatch||online.people.size>=3){
+        conn.send({t:'reject',reason:onlineMsg('対戦中、または満員のルームです。','Room is full or a match is underway.')});
+        setTimeout(()=>conn.close(),250);return;
+      }
+      online.people.set(conn.peer,{conn,name:'Guest',ability:0,seat:online.people.size+1});
+      onlinePublishLobby();
+    });
+    conn.on('data',message=>{
+      if(generation!==online.generation||!onlineIsHost())return;
+      const person=online.people.get(conn.peer);
+      if(!person||!message||typeof message!=='object')return;
+      if(message.t==='hello'||message.t==='profile'){
+        if(online.inMatch)return;
+        person.name=onlineValidName(message.name)||('Guest '+person.seat);
+        person.ability=Number.isInteger(message.ability)?Math.max(0,Math.min(3,message.ability)):0;
+        onlinePublishLobby();return;
+      }
+      if(!online.inMatch||person.seat!==current||!human(activePlayer())||!activePlayer().alive)return;
+      if(message.turn!==turnNo)return;
+      if(message.t==='ability'&&phase==='aim'){
+        usePower();onlineBroadcastState();return;
+      }
+      if(message.t==='shot'&&(phase==='aim'||(timeStop>0&&phase==='moving'))){
+        const {nx,ny,pct}=message;
+        if(!Number.isFinite(nx)||!Number.isFinite(ny)||!Number.isFinite(pct))return;
+        const magnitude=Math.hypot(nx,ny);
+        if(magnitude<.1||magnitude>2)return;
+        fireChargedShot(nx/magnitude,ny/magnitude,Math.max(0,Math.min(1,pct)));
+        onlineBroadcastState();
+      }
+    });
+    conn.on('close',()=>{
+      if(generation!==online.generation)return;
+      const person=online.people.get(conn.peer);
+      if(!person||person.conn!==conn)return;
+      online.people.delete(conn.peer);
+      if(online.inMatch){
+        const actor=erasers[person.seat];
+        if(actor&&actor.alive&&!actor.ai){
+          actor.ai=true;actor.ability=0;actor.barrier=false;actor.abilityUsed=true;
+          if(current===actor.id&&phase==='aim'){
+            phase='cpuWait';timeStop=0;aim=null;
+            const token=gameToken;
+            setTimeout(()=>{if(token===gameToken&&phase==='cpuWait'&&current===actor.id)cpuAct(actor);},300);
+          }
+        }
+        onlineBroadcastState();
+      }else onlinePublishLobby();
+      onlineNotice(onlineMsg('参加者が切断されました。試合中ならCPUが引き継ぎます。','A player disconnected. The CPU takes over during a match.'));
+    });
+    conn.on('error',()=>{if(generation===online.generation)onlineNotice(onlineMsg('参加者との通信で問題が発生しました。','Connection to a player failed.'));});
+  });
+  peer.on('error',err=>{
+    if(generation!==online.generation)return;
+    onlineFail(onlineMsg('ルーム作成に失敗しました：','Could not create room: ')+(err?.type||err?.message||'network'));
+  });
+}
+function onlineJoinRoom(){
+  if(typeof Peer!=='function'){
+    const generation=online.generation;
+    onlineNotice(onlineMsg('接続の準備中…','Preparing connection…'),true);
+    onlineLoadPeer().then(ok=>{
+      if(generation!==online.generation||onlineHomeEl.hidden)return;
+      if(ok)onlineJoinRoom();
+      else onlineNotice(onlineMsg('通信ライブラリを読み込めません。','Cannot load network library.'),true);
+    });return;
+  }
+  const code=document.getElementById('joinCode').value.trim().toUpperCase();
+  if(!/^[A-HJ-NP-Z2-9]{8}$/.test(code)){onlineNotice(onlineMsg('8文字のルームコードを入力してください。','Enter an 8-character room code.'),true);return;}
+  onlineSaveLocalSlots();onlineStartProfile();onlineBeginSession();
+  const generation=online.generation;
+  online.mode='guest';online.code=code;
+  onlineNotice(onlineMsg('接続中…','Connecting…'),true);
+  const peer=new Peer();online.peer=peer;
+  peer.on('open',()=>{
+    if(generation!==online.generation)return;
+    const conn=peer.connect(onlinePeerId(code),{reliable:true});online.conn=conn;
+    conn.on('open',()=>{
+      if(generation!==online.generation)return;
+      onlineSend({t:'hello',name:online.name,ability:online.ability});
+      onlineNotice(onlineMsg('ホストの応答を待機中…','Waiting for host…'),true);
+    });
+    conn.on('data',message=>{
+      if(generation!==online.generation||!onlineIsGuest()||!message||typeof message!=='object')return;
+      if(message.t==='reject'){onlineFail(message.reason||onlineMsg('参加できませんでした。','Unable to join.'));return;}
+      if(message.t==='closed'){onlineFail(onlineMsg('ホストがルームを閉じました。','The host closed the room.'));return;}
+      if(message.t==='room'){
+        online.myIndex=message.you;online.latestRoom=message.room;online.inMatch=false;
+        phase='menu';aim=null;
+        document.getElementById('endActions').style.display='none';statusEl.style.opacity=0;
+        onlineShow('onlineLobby');onlineRefreshText();return;
+      }
+      if(message.t==='start'){
+        online.myIndex=message.you;online.inMatch=true;onlineApplyState(message.state,true);
+        onlineShow(null);onlineRefreshText();return;
+      }
+      if(message.t==='state'&&online.inMatch)onlineApplyState(message.state,false);
+    });
+    conn.on('close',()=>{if(generation===online.generation)onlineFail(onlineMsg('ホストとの通信が切断されました。','Disconnected from host.'));});
+    conn.on('error',()=>{if(generation===online.generation)onlineFail(onlineMsg('ルームに接続できませんでした。','Could not connect to the room.'));});
+  });
+  peer.on('error',err=>{
+    if(generation!==online.generation)return;
+    onlineFail(onlineMsg('接続エラー：','Connection error: ')+(err?.type||err?.message||'network'));
+  });
+  setTimeout(()=>{
+    if(generation===online.generation&&onlineIsGuest()&&!online.latestRoom&&!online.inMatch)
+      onlineFail(onlineMsg('接続がタイムアウトしました。コードを確認してください。','Connection timed out. Check the room code.'));
+  },18000);
+}
+function onlineSend(message){
+  if(online.conn?.open){try{online.conn.send(message);}catch(_){}}
+}
+function onlineSendAll(message){
+  for(const p of online.people.values())if(p.conn?.open){try{p.conn.send(message);}catch(_){}}
+}
+function onlineRoomSeats(){
+  const seats=[{kind:'host',name:online.name||'1P',ability:online.ability}];
+  let n=1;
+  for(const person of online.people.values()){
+    person.seat=n++;
+    seats.push({kind:'guest',name:person.name,ability:person.ability});
+  }
+  online.cpuCount=Math.min(online.cpuCount,4-n);
+  for(let i=0;i<online.cpuCount;i++,n++)seats.push({kind:'cpu',name:online.cpuNames[n]||'CPU'+n,ability:0});
+  while(seats.length<4)seats.push({kind:'empty',name:'',ability:0});
+  return seats;
+}
+function onlinePublishLobby(){
+  if(!onlineIsHost()||online.inMatch)return;
+  const seats=onlineRoomSeats();
+  online.latestRoom={seats,stage:online.stage,cpuCount:online.cpuCount};
+  for(const p of online.people.values())if(p.conn?.open)p.conn.send({t:'room',room:online.latestRoom,you:p.seat});
+  online.myIndex=0;onlineRenderLobby();
+}
+function onlineRenderLobby(){
+  if(online.mode==='off'||!online.latestRoom)return;
+  const room=online.latestRoom,root=document.getElementById('onlineRoster');
+  root.replaceChildren();
+  for(let i=0;i<4;i++){
+    const seat=room.seats[i],el=document.createElement('div');
+    el.className='onlineSeat'+(i===online.myIndex?' me':'')+(seat.kind==='cpu'?' cpu':'');
+    const title=document.createElement('b');title.textContent=(i+1)+'P · '+(
+      seat.kind==='host'?onlineMsg('ホスト','Host'):
+      seat.kind==='guest'?onlineMsg('参加者','Guest'):
+      seat.kind==='cpu'?'CPU':onlineMsg('空き','Empty'));
+    const desc=document.createElement('span');desc.textContent=seat.kind==='empty'?'—':(seat.name||'—')+
+      (seat.kind==='cpu'?'':(' · '+abilities[seat.ability||0].icon));
+    el.append(title,desc);root.append(el);
+  }
+  document.getElementById('onlineRoomCode').textContent=online.code;
+  document.getElementById('onlineHostOptions').hidden=!onlineIsHost();
+  document.getElementById('onlineCpuCount').textContent=room.cpuCount;
+  document.getElementById('cpuPlus').disabled=!onlineIsHost()||room.seats.filter(s=>s.kind!=='cpu'&&s.kind!=='empty').length+online.cpuCount>=4;
+  document.getElementById('cpuMinus').disabled=!onlineIsHost()||online.cpuCount<=0;
+  document.getElementById('onlineStage').value=String(room.stage);
+  document.getElementById('onlineStart').disabled=room.seats.filter(s=>s.kind!=='empty').length<2;
+  const cpuInputs=document.getElementById('onlineCpuNames');cpuInputs.replaceChildren();
+  if(onlineIsHost()){
+    room.seats.forEach((seat,i)=>{
+      if(seat.kind!=='cpu')return;
+      const label=document.createElement('label');label.textContent='CPU '+(i+1);
+      const input=document.createElement('input');input.maxLength=16;input.value=online.cpuNames[i]||'';
+      input.placeholder=onlineMsg('名前・ボス名も可','Name / Boss name');
+      input.onchange=()=>{online.cpuNames[i]=input.value.trim();onlinePublishLobby();};
+      label.append(input);cpuInputs.append(label);
+    });
+  }
+  onlineLobbyStatus.textContent=onlineIsHost()
+    ?onlineMsg('全員が参加したら「対戦スタート！」を押してください。','Press Start Battle once everyone has joined.')
+    :onlineMsg('ホストの対戦開始を待っています。','Waiting for the host to start the match.');
+  if(document.activeElement!==onlineLobbyNameInput)onlineLobbyNameInput.value=online.name;
+}
+function onlineCaptureState(){
+  return {stage,erasers:erasers.map(e=>({...e})),turnOrder:[...turnOrder],turnIndex,current,phase,
+    turnNo,winnerId:winner?.id??null,falls:falls.map(f=>({...f})),fx:fx.map(f=>({...f})),
+    frozenPower,timeStop,satokeTimer,hitstop,kingShotPending};
+}
+function onlineBroadcastState(){
+  if(onlineIsHost()&&online.inMatch)onlineSendAll({t:'state',state:onlineCaptureState()});
+}
+function onlineApplyState(s,start){
+  if(!s||!Array.isArray(s.erasers)||s.erasers.length<2||s.erasers.length>4)return;
+  if(start||stage!==s.stage){stage=s.stage;resize();boardCacheValid=false;}
+  erasers=s.erasers;turnOrder=s.turnOrder||[];turnIndex=s.turnIndex;current=s.current;
+  phase=s.phase;turnNo=s.turnNo;falls=s.falls||[];fx=s.fx||[];
+  frozenPower=s.frozenPower;timeStop=s.timeStop;satokeTimer=s.satokeTimer;
+  hitstop=s.hitstop;kingShotPending=s.kingShotPending;
+  winner=erasers.find(e=>e.id===s.winnerId)||null;
+  onlineIndicator.style.display='block';
+  onlineIndicator.textContent='● ONLINE  ·  '+(online.myIndex+1)+'P  ·  '+(online.code||'');
+  document.getElementById('endActions').style.display=phase==='finished'?'flex':'none';
+  skip.style.display='none';
+  if(phase==='finished'){
+    const name=winner?.name;
+    statusEl.textContent=!winner?tr('引き分け！'):(winner.id===online.myIndex?'YOU WIN! 🎉':(
+      lang==='en'?tr(name)+' wins!':name+' の勝ち！'));
+    statusEl.style.opacity=1;
+    if(winner&&winner.id===online.myIndex)stageWins.add(stage);
+    again.style.display='block';
+    again.disabled=true;
+    again.style.opacity='.55';
+    again.textContent=onlineMsg('ホストの再戦を待つ','Waiting for rematch');
+  }else{
+    statusEl.style.opacity=0;
+    document.getElementById('endActions').style.display='none';
+  }
+  updatePlayerAbility();
+}
+function onlineHostStart(){
+  if(!onlineIsHost())return;
+  const seats=onlineRoomSeats();
+  if(seats.filter(s=>s.kind!=='empty').length<2){onlineNotice(onlineMsg('2人以上必要です。CPUを追加してください。','Need at least two players. Add a CPU.'));return;}
+  seats.forEach((s,i)=>{
+    slots[i].type=s.kind==='empty'?'なし':s.kind==='cpu'?'CPU':(i+1)+'P';
+    slots[i].name=s.kind==='empty'?'':(s.name||'');
+    slots[i].ability=s.kind==='cpu'||s.kind==='empty'?0:(s.ability||0);
+  });
+  online.inMatch=true;online.myIndex=0;
+  init(seats.length-1,online.stage);
+  onlineShow(null);
+  onlineIndicator.style.display='block';
+  onlineIndicator.textContent='● ONLINE  ·  1P  ·  '+online.code;
+  document.getElementById('changeCount').textContent=onlineMsg('⚙ ルームへ戻る','⚙ Back to Room');
+  again.disabled=false;again.style.opacity='1';again.textContent=tr('↻ もう一度遊ぶ');
+  const state=onlineCaptureState();
+  for(const p of online.people.values())if(p.conn?.open)p.conn.send({t:'start',state,you:p.seat});
+  onlineBroadcastState();
+}
+function onlineReturnLobby(){
+  if(onlineIsGuest()){
+    if(online.latestRoom){online.inMatch=false;phase='menu';onlineIndicator.style.display='none';onlineShow('onlineLobby');onlineRenderLobby();}
+    return;
+  }
+  if(!onlineIsHost())return;
+  gameToken++;aim=null;phase='menu';kingShotPending=false;hitstop=0;timeStop=0;
+  online.inMatch=false;skip.style.display='none';statusEl.style.opacity=0;
+  onlineIndicator.style.display='none';
+  document.getElementById('endActions').style.display='none';
+  onlineShow('onlineLobby');onlinePublishLobby();
+}
+document.getElementById('onlineMode').onclick=()=>{onlineRefreshText();onlineNotice('',true);onlineShow('onlineHome');};
+document.getElementById('onlineHomeBack').onclick=()=>{onlineLeave();};
+document.getElementById('createRoom').onclick=onlineCreateRoom;
+document.getElementById('joinRoom').onclick=onlineJoinRoom;
+document.getElementById('joinCode').addEventListener('keydown',e=>{if(e.key==='Enter')onlineJoinRoom();});
+document.getElementById('onlineLeave').onclick=onlineLeave;
+document.getElementById('onlineAbility').onclick=()=>{
+  online.ability=(online.ability+1)%4;onlineRefreshText();
+};
+onlineLobbyNameInput.oninput=()=>{
+  online.name=onlineValidName(onlineLobbyNameInput.value);
+  if(onlineIsHost())onlinePublishLobby();
+  else onlineSend({t:'profile',name:online.name,ability:online.ability});
+};
+document.getElementById('onlineLobbyAbility').onclick=()=>{
+  online.ability=(online.ability+1)%4;onlineRefreshText();
+  if(onlineIsHost())onlinePublishLobby();
+  else onlineSend({t:'profile',name:online.name,ability:online.ability});
+};
+document.getElementById('cpuMinus').onclick=()=>{online.cpuCount=Math.max(0,online.cpuCount-1);onlinePublishLobby();};
+document.getElementById('cpuPlus').onclick=()=>{online.cpuCount=Math.min(3-online.people.size,online.cpuCount+1);onlinePublishLobby();};
+document.getElementById('onlineStage').onchange=e=>{online.stage=Number(e.target.value);onlinePublishLobby();};
+document.getElementById('onlineStart').onclick=onlineHostStart;
+document.getElementById('copyRoom').onclick=async()=>{
+  const url=new URL(location.href);url.searchParams.set('room',online.code);
+  try{await navigator.clipboard.writeText(url.href);onlineNotice(onlineMsg('招待リンクをコピーしました！','Invite link copied!'));}
+  catch(_){onlineNotice(url.href);}
+};
+const invitedCode=new URL(location.href).searchParams.get('room');
+if(invitedCode&&/^[A-HJ-NP-Z2-9]{8}$/.test(invitedCode.toUpperCase())){
+  document.getElementById('joinCode').value=invitedCode.toUpperCase();
+  onlineShow('onlineHome');
+}
+onlineRefreshText();
 
 function syncSetup(){
   renderRoster();
@@ -1052,7 +1491,9 @@ document.getElementById('startGame').onclick=()=>init(selectedCount,selectedStag
 document.getElementById('mode').onclick=()=>{selectedCount=cpuCount;selectedStage=stage;syncSetup();document.getElementById('menu').hidden=true;document.getElementById('select').hidden=false};
 document.getElementById('rulesBtn').onclick=()=>{document.getElementById('menu').hidden=true;document.getElementById('rules').hidden=false};
 document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{document.getElementById('select').hidden=true;document.getElementById('rules').hidden=true;document.getElementById('menu').hidden=false});
-localizeStatic();init(3,0);phase='menu';document.getElementById('menu').hidden=false;requestAnimationFrame(loop);
+localizeStatic();init(3,0);phase='menu';document.getElementById('menu').hidden=false;
+if(invitedCode&&/^[A-HJ-NP-Z2-9]{8}$/.test(invitedCode.toUpperCase()))onlineShow('onlineHome');
+requestAnimationFrame(loop);
 })();
 </script>
 </body>
