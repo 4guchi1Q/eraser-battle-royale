@@ -360,7 +360,7 @@ const WORLD_W=1000,WORLD_H=700;
 let viewPortrait=false,viewScale=1,viewOffsetX=0,viewOffsetY=0;
 function resize(){
   const sw=Math.max(1,window.innerWidth||320),sh=Math.max(1,window.innerHeight||568);
-  viewPortrait=sw<sh;
+  const previousPortrait=viewPortrait; viewPortrait=sw<sh; if(previousPortrait!==viewPortrait)boardCacheValid=false;
   const displayW=viewPortrait?WORLD_H:WORLD_W;
   const displayH=viewPortrait?WORLD_W:WORLD_H;
   viewScale=Math.min(sw/displayW,sh/displayH);
@@ -815,8 +815,21 @@ function roundedRect(x,y,w,h,r){
 function drawBoard(){
   const photo=stage===0?classroom:stage===1?pencilClassroom:artClassroom;
   if(photo.complete&&photo.naturalWidth){
-    const iw=photo.naturalWidth,ih=photo.naturalHeight,sc=Math.max(W/iw,H/ih);
-    ctx.drawImage(photo,(W-iw*sc)/2,(H-ih*sc)/2,iw*sc,ih*sc);
+    const iw=photo.naturalWidth,ih=photo.naturalHeight;
+    if(viewPortrait){
+      // The world is rotated for portrait play; counter-rotate only the scenery
+      // so the classroom/art-room photograph remains upright on the phone.
+      // Cover-crop fills the entire portrait world without stretching.
+      ctx.save();
+      ctx.translate(0,H);
+      ctx.rotate(-Math.PI/2);
+      const sc=Math.max(H/iw,W/ih);
+      ctx.drawImage(photo,(H-iw*sc)/2,(W-ih*sc)/2,iw*sc,ih*sc);
+      ctx.restore();
+    }else{
+      const sc=Math.max(W/iw,H/ih);
+      ctx.drawImage(photo,(W-iw*sc)/2,(H-ih*sc)/2,iw*sc,ih*sc);
+    }
     ctx.fillStyle='rgba(14,13,12,.22)';ctx.fillRect(0,0,W,H);
   }else{
     ctx.fillStyle='#745c49';ctx.fillRect(0,0,W,H);
