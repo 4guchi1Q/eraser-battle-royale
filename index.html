@@ -411,10 +411,10 @@ function init(count=cpuCount, chosenStage=stage){
   const pos=(x,y)=>[board.x+board.w*x,board.y+board.h*y];
   // 2人は対角、3人は三角形、4人は四隅。
   const spots=cpuCount===1
-    ? [pos(.30,.70),pos(.70,.30)]
+    ? [pos(.70,.30),pos(.30,.70)]
     : cpuCount===2
-      ? [pos(.50,.72),pos(.30,.28),pos(.70,.28)]
-      : [pos(.30,.72),pos(.30,.28),pos(.70,.28),pos(.70,.72)];
+      ? [pos(.70,.30),pos(.30,.30),pos(.50,.72)]
+      : [pos(.70,.30),pos(.30,.30),pos(.30,.70),pos(.70,.70)];
   // 筆箱と重ならないよう初期配置は四隅寄りのままにする。
   erasers=spots.slice(0,cpuCount+1).map((p,i)=>({
     id:i,name:canonicalBossName(activeSlots[i].name.trim())||ns[i],x:p[0],y:p[1],vx:0,vy:0,spin:0,ang:rnd(-.25,.25),
@@ -914,7 +914,7 @@ function drawEraser(e, falling=false){
   ctx.fillStyle='rgba(0,0,0,.15)';ctx.fillRect(-19,11,38,4);
   ctx.fillStyle='#fff';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.font=e.boss?'bold 10px sans-serif':'bold 12px sans-serif';
-  ctx.fillText(e.boss?e.label:(e.ai?`CPU${e.id}`:`${e.id+1}P`),0,0);
+  ctx.save();if(viewPortrait)ctx.rotate(-Math.PI/2);ctx.fillText(e.boss?e.label:(e.ai?`CPU${e.id}`:`${e.id+1}P`),0,0);ctx.restore();
   if(!falling&&e.boss){
     const pulse=1+Math.sin(performance.now()/120)*.12;
     ctx.save();ctx.globalAlpha=.65;ctx.shadowBlur=18;ctx.lineWidth=3;
@@ -950,9 +950,10 @@ function drawEraser(e, falling=false){
   }
   if(falling)return;
   ctx.save();ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';
-  const displayName=tr(e.name);const tw=ctx.measureText(displayName).width+18, yy=e.y-lift-28;
-  ctx.fillStyle='rgba(15,17,20,.78)';rr(ctx,e.x-tw/2,yy-17,tw,19,8);ctx.fill();
-  ctx.fillStyle=!e.ai?'#ffe047':'#fff';ctx.fillText(displayName,e.x,yy-3);ctx.restore();
+  const displayName=tr(e.name);const tw=ctx.measureText(displayName).width+18;
+  ctx.translate(e.x,e.y-lift);if(viewPortrait)ctx.rotate(-Math.PI/2);
+  ctx.fillStyle='rgba(15,17,20,.78)';rr(ctx,-tw/2,-45,tw,19,8);ctx.fill();
+  ctx.fillStyle=!e.ai?'#ffe047':'#fff';ctx.fillText(displayName,0,-31);ctx.restore();
 }
 function render(){
   ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);
