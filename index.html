@@ -885,14 +885,36 @@ function drawAim(){
 
 }
 function drawPowerBar(power){
-  const gw=Math.min(W*.65,230),gx=(W-gw)/2,gy=board.y+board.h-52;
+  // Portrait: draw in screen coordinates so the meter stays horizontal,
+  // in the black margin BELOW the rotated tabletop (not on the board).
+  ctx.save();
+  let gw,gx,gy,centerX;
+  if(viewPortrait){
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const screenW=canvas.width/dpr;
+    const screenH=canvas.height/dpr;
+    const boardBottom=viewOffsetY+(board.x+board.w)*viewScale;
+    const bottomSpace=Math.max(0,screenH-boardBottom);
+    gw=Math.min(screenW*.68,230);
+    centerX=screenW/2;
+    gx=centerX-gw/2;
+    // Place the complete meter and label in the bottom black margin.
+    gy=boardBottom+Math.max(23,(bottomSpace-33)/2+14);
+    gy=Math.min(gy,screenH-25);
+  }else{
+    gw=Math.min(W*.65,230);
+    gx=(W-gw)/2;
+    gy=board.y+board.h-52;
+    centerX=W/2;
+  }
   ctx.fillStyle='#1a1a1acc';rr(ctx,gx-8,gy-9,gw+16,36,10);ctx.fill();
   ctx.fillStyle='#555';rr(ctx,gx,gy,gw,18,6);ctx.fill();
   const g=ctx.createLinearGradient(gx,0,gx+gw,0);
   g.addColorStop(0,'#4ade80');g.addColorStop(.5,'#facc15');g.addColorStop(1,'#ef4444');
   ctx.fillStyle=g;rr(ctx,gx,gy,Math.max(2,gw*power),18,6);ctx.fill();
   ctx.fillStyle='#fff';ctx.font='bold 12px sans-serif';ctx.textAlign='center';
-  ctx.fillText('POWER  '+Math.round(power*100)+'%',W/2,gy-15);
+  ctx.fillText('POWER  '+Math.round(power*100)+'%',centerX,gy-15);
+  ctx.restore();
 }
 function drawEraser(e, falling=false){
   const age=falling?e.age:0;
