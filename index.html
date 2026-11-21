@@ -354,36 +354,42 @@ useAbility.addEventListener('pointerdown',e=>e.stopPropagation());
 useAbility.addEventListener('click',usePower);
 
 
+// 共通のゲーム座標系。PCもスマホも同じ机・消しゴム・摩擦・物理演算。
+// スマホは描画とタッチ座標だけ90度回転して、同じ横長の盤面を縦向きに見せる。
+const WORLD_W=1000,WORLD_H=700;
+let viewPortrait=false,viewScale=1,viewOffsetX=0,viewOffsetY=0;
 function resize(){
-  // 高解像度モニターでも内部描画を過剰に拡大しない。
-  // 描画ピクセル数の上限は約160万（フルHD以下）、DPRは最大1.5。
+  const sw=Math.max(1,window.innerWidth||320),sh=Math.max(1,window.innerHeight||568);
+  viewPortrait=sw<sh;
+  const displayW=viewPortrait?WORLD_H:WORLD_W;
+  const displayH=viewPortrait?WORLD_W:WORLD_H;
+  viewScale=Math.min(sw/displayW,sh/displayH);
+  viewOffsetX=(sw-displayW*viewScale)/2;
+  viewOffsetY=(sh-displayH*viewScale)/2;
   const nativeDpr=Math.min(Number(window.devicePixelRatio)||1,1.5);
-  const cssW=Math.max(1,window.innerWidth||320),cssH=Math.max(1,window.innerHeight||568);
-  dpr=Math.min(nativeDpr,Math.sqrt(1600000/(cssW*cssH)));
-  W=Math.max(1,window.innerWidth||document.documentElement.clientWidth||320);
-  H=Math.max(1,window.innerHeight||document.documentElement.clientHeight||568);
-  canvas.width=Math.max(1,Math.round(W*dpr)); canvas.height=Math.max(1,Math.round(H*dpr)); boardCacheValid=false; canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  dpr=Math.min(nativeDpr,Math.sqrt(1600000/(sw*sh)));
+  canvas.width=Math.max(1,Math.round(sw*dpr));
+  canvas.height=Math.max(1,Math.round(sh*dpr));
+  canvas.style.width=sw+'px';canvas.style.height=sh+'px';
+  W=WORLD_W;H=WORLD_H;
+  boardCacheValid=false;
+  // 全端末で共通の横長ステージ寸法。スマホでは全体を90度回転して表示。
+  board.h=H-115;
+  board.w=Math.min(W-55,board.h*(stage===1?1.60:stage===2?1.55:1.58));
+  board.x=(W-board.w)/2;
+  board.y=(H-board.h)/2;
+}
+function setWorldTransform(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  // 縦画面では横長の机を90度回した縦長レイアウトとして扱う。
-  // 机の座標系・衝突判定も縦長になるため、PC版の挙動を保ったまま遊べる。
-  const portrait=W<H;
-  if(portrait){
-    const topReserve=58,bottomReserve=62;
-    const availableW=Math.max(190,W-10);
-    const availableH=Math.max(260,H-topReserve-bottomReserve);
-    const aspect=stage===0?1.68:stage===1?1.72:1.62;
-    board.w=Math.min(availableW,availableH/aspect);
-    board.h=board.w*aspect;
-    board.x=(W-board.w)/2;
-    board.y=topReserve+(availableH-board.h)/2;
-  }else{
-    board.h=Math.min(H-85,850);
-    board.w=Math.min(W-45,board.h*(stage===1?1.45:stage===2?1.42:1.24));
-    board.w=Math.max(200,board.w);
-    board.h=Math.max(250,board.h);
-    board.x=(W-board.w)/2;
-    board.y=Math.max(64,(H-board.h)/2);
-  }
+  ctx.translate(viewOffsetX,viewOffsetY);
+  ctx.scale(viewScale,viewScale);
+  if(viewPortrait){ctx.translate(WORLD_H,0);ctx.rotate(Math.PI/2);}
+}
+function pointerToWorld(e){
+  const rect=canvas.getBoundingClientRect();
+  const sx=e.clientX-rect.left-viewOffsetX,sy=e.clientY-rect.top-viewOffsetY;
+  if(viewPortrait)return {x:sy/viewScale,y:WORLD_H-sx/viewScale};
+  return {x:sx/viewScale,y:sy/viewScale};
 }
 addEventListener('resize',resize);
 addEventListener('orientationchange',()=>setTimeout(resize,180));
@@ -412,7 +418,7 @@ function init(count=cpuCount, chosenStage=stage){
   // 筆箱と重ならないよう初期配置は四隅寄りのままにする。
   erasers=spots.slice(0,cpuCount+1).map((p,i)=>({
     id:i,name:canonicalBossName(activeSlots[i].name.trim())||ns[i],x:p[0],y:p[1],vx:0,vy:0,spin:0,ang:rnd(-.25,.25),
-    r:W<H?16:17,halfW:W<H?25.5:27,halfH:W<H?12.3:13,alive:true,ai:activeSlots[i].type==='CPU',ability:activeSlots[i].type==='CPU'?0:activeSlots[i].ability,abilityUsed:false,barrier:false,caseColor:caseColors[i],
+    r:17,halfW:27,halfH:13,alive:true,ai:activeSlots[i].type==='CPU',ability:activeSlots[i].type==='CPU'?0:activeSlots[i].ability,abilityUsed:false,barrier:false,caseColor:caseColors[i],
     squash:0,air:0
   }));
   // 当該ステージで優勝後は20%、全3ステージ優勝後は50%で隠しボスに置換。
@@ -487,8 +493,8 @@ function pointerUp(){
   shoot(activePlayer(),a.nx,a.ny,power);
   // 時間停止中も物理演算は継続。追加のフリックをいつでも受け付ける。
 }
-canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture?.(e.pointerId);pointerDown(e.clientX,e.clientY)});
-canvas.addEventListener('pointermove',e=>pointerMove(e.clientX,e.clientY));
+canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture?.(e.pointerId);const p=pointerToWorld(e);pointerDown(p.x,p.y)});
+canvas.addEventListener('pointermove',e=>{const p=pointerToWorld(e);pointerMove(p.x,p.y)});
 canvas.addEventListener('pointerup',pointerUp);
 canvas.addEventListener('pointercancel',()=>aim=null);
 skip.addEventListener('click',()=>{
@@ -628,10 +634,7 @@ function eliminate(e){
 }
 
 function obstacle(){
-  // 横長の筆箱。描画も衝突も同じ矩形を使う。
-  if(W<H){ // 机を縦向きにしたら筆箱も縦方向に置く
-    return {x:board.x+board.w*.5-Math.min(60,board.w*.18)/2,y:board.y+board.h*.355,w:Math.min(60,board.w*.18),h:board.h*.29};
-  }
+  // 共通の横長筆箱。スマホでは盤面と一緒に90度回転して表示される。
   return {x:board.x+board.w*.335,y:board.y+board.h*.465-Math.min(58,board.h*.145)/2,w:board.w*.33,h:Math.min(58,board.h*.145)};
 }
 // 机の縁に刻まれた三角形の切れ込み。描画と落下判定で同じ頂点を使用。
@@ -704,7 +707,7 @@ function physics(dt){
           e.vx*=-.5;e.vy*=-.5;
         }
       }
-      const drag=W<H?.951:friction; e.vx*=Math.pow(drag,s*60);e.vy*=Math.pow(drag,s*60);
+      const drag=friction; e.vx*=Math.pow(drag,s*60);e.vy*=Math.pow(drag,s*60);
       if(e.bombProtected>0){
         e.bombProtected=Math.max(0,e.bombProtected-s);
         const margin=18;
@@ -896,7 +899,7 @@ function drawEraser(e, falling=false){
   const lift=falling?0:Math.max(0,e.air)*16;
   const scale=falling?Math.max(.03,1-age*1.65):1;
   ctx.save();ctx.translate(e.x,e.y-lift+(falling?age*age*135:0));
-  ctx.rotate(e.ang+(falling?age*4:0));ctx.scale(scale*(W<H?.81:.85),scale*(W<H?.81:.85));
+  ctx.rotate(e.ang+(falling?age*4:0));ctx.scale(scale*.85,scale*.85);
   ctx.globalAlpha=falling?Math.max(0,1-age*1.4):1;
   ctx.save();ctx.globalAlpha*=.24;ctx.fillStyle='#000';ctx.filter='blur(5px)';
   ctx.beginPath();ctx.ellipse(3,12+lift,31,11,0,0,Math.PI*2);ctx.fill();ctx.restore();
@@ -952,7 +955,8 @@ function drawEraser(e, falling=false){
   ctx.fillStyle=!e.ai?'#ffe047':'#fff';ctx.fillText(displayName,e.x,yy-3);ctx.restore();
 }
 function render(){
-  ctx.clearRect(0,0,W,H);drawBoardCached();drawAim();
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);
+  setWorldTransform();ctx.clearRect(0,0,W,H);drawBoardCached();drawAim();
   for(const e of erasers)if(e.alive)drawEraser(e);
   for(const e of falls)drawEraser(e,true);
   if(timeStop>0||satokeTimer>0){
@@ -963,6 +967,7 @@ function render(){
     ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 24px sans-serif';ctx.fillStyle='#fff';ctx.shadowColor='#000';ctx.shadowBlur=7;ctx.fillText(remaining.toFixed(1),x,y);ctx.restore();
   }
   for(const f of fx){ctx.save();ctx.globalAlpha=Math.max(0,1-f.age/1.15);ctx.textAlign='center';ctx.font='900 24px sans-serif';ctx.lineWidth=4;ctx.strokeStyle='#1b1b1b';ctx.strokeText(f.text,f.x,f.y-f.age*50);ctx.fillStyle=f.text==='PERFECT!!'?'#ffe34a':'#eee';ctx.fillText(f.text,f.x,f.y-f.age*50);ctx.restore();}
+  ctx.setTransform(1,0,0,1,0,0);
 }
 function loop(t){
   const dt=Math.min(.033,((t-last)/1000)||.016);last=t;
