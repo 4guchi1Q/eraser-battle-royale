@@ -152,6 +152,19 @@
   .onlineSeat b{display:block;color:#3c311f;margin-bottom:3px}
   .onlineSeat.me{border-color:#3e94cc;background:#e7f6ff}
   .onlineSeat.cpu{border-color:#c69b4d}
+  .onlineFlowStep{background:#fff9e9;border:2px solid #c8b694;border-radius:10px;padding:13px;margin:11px 0;text-align:left;min-width:0}
+  .onlineStepTitle{display:inline-block;background:#ffdf6a;border:2px solid #a88033;padding:5px 10px;border-radius:6px;font-size:14px;font-weight:1000;color:#362916}
+  .onlineStepHint{font-size:12px;color:#695b43;font-weight:700;line-height:1.5;margin:8px 0 4px}
+  .onlineChoiceGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .onlineChoiceGrid .onlineFlowStep{display:flex;flex-direction:column;gap:7px;margin:0}
+  .onlineChoiceGrid .onlineFlowStep .onlineStepHint{flex:1}
+  .panel .onlineChoiceGrid button{font-size:15px;margin:3px 0 0;padding:11px 8px}
+  .panel .onlineFlowStep .onlineFields{margin:10px 0 6px}
+  .onlineProfileSummary{text-align:left;background:#e4f3fa;border:2px solid #86b5ce;border-radius:9px;padding:11px 14px;font-size:13px;font-weight:800;margin:10px 0;overflow-wrap:anywhere}
+  #onlineStageChoices{margin-bottom:10px}
+  #onlineStageChoices button:disabled{opacity:.76;cursor:default}
+  #onlineStageChoices button.chosen:disabled{opacity:1}
+  #onlineStageNote{font-size:12px;color:#675945;margin:4px 0 12px;text-align:center}
   .onlineOptions{display:flex;align-items:center;gap:10px;justify-content:space-between;background:#fff9e9;padding:9px;border:1px solid #cfbd9e;border-radius:8px;margin:7px 0}
   .panel .onlineOptions button{width:44px;margin:0;padding:6px;font-size:17px}
   .onlineOptions select{padding:8px;max-width:65%;font-size:14px;border:2px solid #bc9c63;border-radius:8px;background:white}
@@ -159,7 +172,7 @@
   #onlineCpuNames label{text-align:left;font-size:12px}
   #onlineCpuNames input{margin-top:2px;padding:7px;font-size:13px}
   #onlineIndicator{display:none;position:fixed;z-index:8;left:50%;top:max(58px,calc(env(safe-area-inset-top) + 54px));transform:translateX(-50%);background:#142f46de;color:#fff;border:1px solid #add9f9;border-radius:9px;padding:5px 10px;font-size:11px;font-weight:900;white-space:nowrap;pointer-events:none}
-  @media(max-width:470px){.onlineFields{grid-template-columns:1fr}.onlineOptions{font-size:13px}#onlineRoster{gap:5px}.onlineSeat{padding:7px;font-size:11px}}
+  @media(max-width:470px){.onlineFields{grid-template-columns:1fr}.onlineOptions{font-size:13px}#onlineRoster{gap:5px}.onlineSeat{padding:7px;font-size:11px}.onlineChoiceGrid{grid-template-columns:1fr}.onlineFlowStep{padding:10px}}
   /* 縦持ちスマートフォン向け。メニューはスクロール可能にする。 */
   @media (max-width:600px) and (orientation:portrait){
     #game{height:100dvh;touch-action:none}
@@ -181,16 +194,26 @@
 <body>
 <canvas id="game"></canvas>
 <noscript><div style="position:fixed;inset:0;z-index:100;background:#222;color:#fff;padding:30px;font-size:18px">このゲームにはJavaScriptが必要です。</div></noscript>
-<section class="overlay" id="menu"><div class="panel"><div class="crown">♛</div><h1>消しゴム<br><em>バトルロイヤル</em></h1><div class="english">ERASER BATTLE ROYALE</div><button id="mode">▶ START</button><button id="onlineMode">🌐 オンライン対戦</button><button class="secondary" id="langSwitch" style="font-size:14px">🌐 日本語 / English</button><button class="secondary" id="rulesBtn">▤ ルール説明</button></div></section>
+<section class="overlay" id="menu"><div class="panel"><div class="crown">♛</div><h1>消しゴム<br><em>バトルロイヤル</em></h1><div class="english">ERASER BATTLE ROYALE</div><button id="mode">▶ ローカル対戦</button><button id="onlineMode">🌐 オンライン対戦</button><button class="secondary" id="langSwitch" style="font-size:14px">日本語 / English</button><button class="secondary" id="rulesBtn">▤ ルール説明</button></div></section>
 <section class="overlay" id="onlineHome" hidden><div class="panel"><h2>🌐 オンライン対戦</h2><div class="menuSubtitle">友達とルームコードで対戦。1端末につき1人、最大4人。</div>
-  <div class="onlineFields"><label>自分の名前<input id="onlineName" maxlength="16" placeholder="名前（空欄でおまかせ）"></label><label>自分の能力<button type="button" id="onlineAbility">🚫 能力なし ↻</button></label></div>
-  <button id="createRoom">＋ ルームを作成</button><div class="onlineLabel">ルームコードで参加</div><input id="joinCode" maxlength="8" spellcheck="false" autocapitalize="characters" placeholder="XXXXXXXX"><button id="joinRoom">→ ルームに参加</button>
+  <div class="onlineFlowStep"><div class="onlineStepTitle">STEP 1 · プレイヤー設定</div><div class="onlineStepHint">先に名前と能力を決めてください。作成・参加後の対戦中は変更できません。</div>
+    <div class="onlineFields"><label>自分の名前<input id="onlineName" maxlength="16" placeholder="名前（空欄でおまかせ）"></label><label>自分の能力<button type="button" id="onlineAbility">🚫 能力なし ↻</button></label></div>
+    <div class="onlineStepHint">※名前が空欄の場合はランダムで決まります。</div>
+  </div>
+  <div class="onlineChoiceGrid">
+    <div class="onlineFlowStep"><div class="onlineStepTitle">STEP 2-A · ルームを作る</div><div class="onlineStepHint">ホストとしてルームを作り、友達にコードを送ります。</div><button id="createRoom">＋ ルームを作成</button></div>
+    <div class="onlineFlowStep"><div class="onlineStepTitle">STEP 2-B · ルームに参加</div><div class="onlineStepHint">友達から届いた8文字のコードを入力。</div><input id="joinCode" maxlength="8" spellcheck="false" autocapitalize="characters" placeholder="XXXXXXXX"><button id="joinRoom">→ ルームに参加</button></div>
+  </div>
   <div id="onlineConnectStatus" class="onlineNotice" role="status"></div><button class="secondary" id="onlineHomeBack">⌂ タイトルに戻る</button>
 </div></section>
 <section class="overlay" id="onlineLobby" hidden><div class="panel"><h2>⚡ オンラインルーム</h2><div id="onlineRoomCode" class="roomCode">────────</div><button id="copyRoom">🔗 招待リンクをコピー</button><div id="onlineLobbyStatus" class="onlineNotice" role="status"></div>
-  <div class="onlineFields"><label>自分の名前<input id="onlineLobbyName" maxlength="16"></label><label>自分の能力<button type="button" id="onlineLobbyAbility">🚫 能力なし ↻</button></label></div>
-  <div id="onlineRoster"></div><div id="onlineHostOptions"><div class="onlineOptions"><strong>CPUを追加</strong><button type="button" id="cpuMinus">－</button><b id="onlineCpuCount">0</b><button type="button" id="cpuPlus">＋</button></div>
-  <div class="onlineOptions"><strong>ステージ</strong><select id="onlineStage"><option value="0">StandardArena</option><option value="1">PencaStadium</option><option value="2">CarvingColiseum</option></select></div><div id="onlineCpuNames"></div><button id="onlineStart">▶ 対戦スタート！</button></div>
+  <div class="onlineProfileSummary" id="onlineProfileSummary"></div>
+  <div id="onlineRoster"></div><div id="onlineHostOptions"><div class="onlineOptions"><strong>CPUを追加</strong><button type="button" id="cpuMinus">－</button><b id="onlineCpuCount">0</b><button type="button" id="cpuPlus">＋</button></div><div id="onlineCpuNames"></div></div>
+  <strong class="stageLabel">▣ ステージ選択</strong><div id="onlineStageChoices" class="stageChoices">
+    <button data-online-stage="0" class="chosen"><span class="stageThumb thumb0"></span><span>おわりのコロシアム<small>シンプルな木の机</small></span></button>
+    <button data-online-stage="1"><span class="stageThumb thumb1"></span><span>ふでばこスタジアム<small>中央に筆箱がある長方形の机</small></span></button>
+    <button data-online-stage="2"><span class="stageThumb thumb2"></span><span>ちょうこくとうぎじょう<small>端が三角形に欠けた緑の机</small></span></button>
+  </div><div id="onlineStageNote" hidden>ステージはホストが選択します。</div><div id="onlineHostStart"><button id="onlineStart">▶ 対戦スタート！</button></div>
   <button class="secondary" id="onlineLeave">← ルームから退出</button>
 </div></section>
 <section class="overlay" id="select" hidden><div class="panel"><h2>⚡ 対戦メニュー</h2><div class="menuSubtitle">プレイヤー・ステージ・能力を決めよう！</div>
@@ -216,6 +239,7 @@
 const englishStageNames=['StandardArena','PencaStadium','CarvingColiseum'];
 const translations={
 '消しゴム':'ERASER','バトルロイヤル':'BATTLE ROYALE','▤ ルール説明':'▤ How to Play',
+'▶ ローカル対戦':'▶ Local Battle',
 '⚡ 対戦メニュー':'⚡ Battle Setup','プレイヤー・ステージ・能力を決めよう！':'Choose players, stages and abilities!',
 '▣ ステージ選択':'▣ Select Stage','おわりのコロシアム':'StandardArena','ふでばこスタジアム':'PencaStadium','ちょうこくとうぎじょう':'CarvingColiseum',
 'シンプルな木の机':'A simple wooden table','中央に筆箱がある長方形の机':'A rectangular desk with a pencil case','端が三角形に欠けた緑の机':'A green desk with triangular notches',
@@ -245,6 +269,14 @@ const translations={
 '→ ルームに参加':'→ Join Room','⌂ タイトルに戻る':'⌂ Back to Title','⚡ オンラインルーム':'⚡ Online Room',
 '🔗 招待リンクをコピー':'🔗 Copy Invite Link','CPUを追加':'Add CPUs','ステージ':'Stage','← ルームから退出':'← Leave Room'
 ,'オンライン対戦では、1端末につき1人が参加。ルームコードで友達を招待し、自分のターンに操作します。ホストがステージとCPUを決めます。':'For online play, one player joins per device. Invite friends with a room code and play on your own turn. The host chooses the stage and CPUs.'
+,'STEP 1 · プレイヤー設定':'STEP 1 · Player Setup'
+,'先に名前と能力を決めてください。作成・参加後の対戦中は変更できません。':'Choose your name and ability first. They cannot be changed during the match.'
+,'※名前が空欄の場合はランダムで決まります。':'Leave the name blank to get a random one.'
+,'STEP 2-A · ルームを作る':'STEP 2-A · Create Room'
+,'ホストとしてルームを作り、友達にコードを送ります。':'Create a room as the host and send its code to friends.'
+,'STEP 2-B · ルームに参加':'STEP 2-B · Join Room'
+,'友達から届いた8文字のコードを入力。':'Enter the 8-character code from your friend.'
+,'ステージはホストが選択します。':'The host chooses the stage.'
 };
 const englishAbilities=['None','Shield','Time Stop','Explosion'];
 let lang=(navigator.language||'ja').toLowerCase().startsWith('ja')?'ja':'en';
@@ -260,7 +292,7 @@ function localizeStatic(){
   if(translations[clean])n.nodeValue=original.replace(clean,tr(clean));
  }
  document.documentElement.lang=lang;
- document.getElementById('langSwitch').textContent=lang==='ja'?'🌐 日本語 / English':'🌐 English / 日本語';
+ document.getElementById('langSwitch').textContent=lang==='ja'?'日本語 / English':'English / 日本語';
  document.getElementById('useAbility').setAttribute('aria-label',lang==='en'?'Activate ability':'能力を発動');
 }
 document.getElementById('langSwitch').onclick=()=>{lang=lang==='ja'?'en':'ja';localizeStatic();renderRoster();onlineRefreshText();};
@@ -319,7 +351,40 @@ let selectedSlots=null;
 // WebRTCの接続は1端末につき1人。進行・物理演算・CPUはホストだけで実行する。
 const online={mode:'off',peer:null,conn:null,code:'',people:new Map(),myIndex:0,
   inMatch:false,name:'',ability:0,cpuCount:0,cpuNames:['','','',''],stage:0,
-  generation:0,lastStateSent:0,latestRoom:null};
+  generation:0,lastStateSent:0,lastPingSent:0,ping:null,latestRoom:null};
+// 受信した物理状態は確定値として保持し、表示座標だけ滑らかにつなぐ。
+const onlineSmooth={active:false,from:new Map(),to:new Map(),started:0,span:36,lastPacket:0};
+function onlineVisualMap(now=performance.now()){
+  const ratio=Math.max(0,Math.min(1,(now-onlineSmooth.started)/onlineSmooth.span));
+  const result=new Map();
+  for(const [id,target] of onlineSmooth.to){
+    const source=onlineSmooth.from.get(id)||target;
+    result.set(id,{
+      x:source.x+(target.x-source.x)*ratio,y:source.y+(target.y-source.y)*ratio,
+      ang:source.ang+(target.ang-source.ang)*ratio,
+      air:source.air+(target.air-source.air)*ratio,
+      squash:source.squash+(target.squash-source.squash)*ratio
+    });
+  }
+  return result;
+}
+function onlineRememberPositions(incoming,reset=false){
+  const now=performance.now();
+  const dest=new Map(incoming.map(e=>[e.id,{x:e.x,y:e.y,ang:e.ang,air:e.air||0,squash:e.squash||0}]));
+  if(reset||!onlineSmooth.active){
+    onlineSmooth.from=dest;onlineSmooth.to=dest;onlineSmooth.span=1;
+  }else{
+    onlineSmooth.from=onlineVisualMap(now);
+    onlineSmooth.to=dest;
+    onlineSmooth.span=Math.max(27,Math.min(65,(now-onlineSmooth.lastPacket)*1.05));
+  }
+  onlineSmooth.started=now;onlineSmooth.lastPacket=now;onlineSmooth.active=true;
+}
+function onlineUpdateIndicator(){
+  if(online.mode==='off')return;
+  onlineIndicator.textContent='● ONLINE · '+(online.myIndex+1)+'P · '+online.code+
+    (onlineIsGuest()&&online.ping!==null?' · '+online.ping+'ms':'');
+}
 const onlineIsGuest=()=>online.mode==='guest';
 const onlineIsHost=()=>online.mode==='host';
 function canControl(e){return human(e)&&e.alive&&(!online.inMatch||(e.id===online.myIndex&&online.mode!=='off'));}
@@ -1052,7 +1117,11 @@ function drawEraser(e, falling=false){
 function render(){
   ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);
   setWorldTransform();ctx.clearRect(0,0,W,H);drawBoardCached();drawAim();
-  for(const e of erasers)if(e.alive)drawEraser(e);
+  const visual=onlineIsGuest()&&online.inMatch&&onlineSmooth.active?onlineVisualMap():null;
+  for(const e of erasers)if(e.alive){
+    const p=visual?.get(e.id);
+    drawEraser(p?{...e,...p}:e);
+  }
   for(const e of falls)drawEraser(e,true);
   if(timeStop>0||satokeTimer>0){
     const remaining=timeStop>0?timeStop:satokeTimer;
@@ -1100,14 +1169,17 @@ function loop(t){
     falls=falls.filter(f=>f.age<.8);
     for(const f of fx)f.age+=hitstop>0?0:dt;fx=fx.filter(f=>f.age<1.15);
     lossControls();
-    if(onlineIsHost()&&online.inMatch&&t-online.lastStateSent>=50){onlineBroadcastState();online.lastStateSent=t;}
+    if(onlineIsHost()&&online.inMatch&&t-online.lastStateSent>=33){onlineBroadcastState();online.lastStateSent=t;}
+  }
+  if(onlineIsGuest()&&online.inMatch&&t-online.lastPingSent>=2000){
+    online.lastPingSent=t;onlineSend({t:'ping',sentAt:performance.now()});
   }
   updateUI();abilityUI();render();requestAnimationFrame(loop);
 }
 
 // ===== ONLINE ROOM (PeerJS / WebRTC) =====
 const onlineHomeEl=document.getElementById('onlineHome'),onlineLobbyEl=document.getElementById('onlineLobby');
-const onlineNameInput=document.getElementById('onlineName'),onlineLobbyNameInput=document.getElementById('onlineLobbyName');
+const onlineNameInput=document.getElementById('onlineName');
 const onlineLobbyStatus=document.getElementById('onlineLobbyStatus');
 const onlineIndicator=document.getElementById('onlineIndicator');
 let onlinePeerLibraryPromise=null;
@@ -1133,11 +1205,8 @@ function onlineShow(which){
 function onlineRefreshText(){
   const abilityText=abilities[online.ability].icon+' '+tr(abilities[online.ability].name)+' ↻';
   document.getElementById('onlineAbility').textContent=abilityText;
-  document.getElementById('onlineLobbyAbility').textContent=abilityText;
   onlineNameInput.placeholder=onlineMsg('名前（空欄でおまかせ）','Name (random if blank)');
-  onlineLobbyNameInput.placeholder=onlineNameInput.placeholder;
   if(document.activeElement!==onlineNameInput)onlineNameInput.value=online.name;
-  if(document.activeElement!==onlineLobbyNameInput)onlineLobbyNameInput.value=online.name;
   if(online.mode!=='off')onlineRenderLobby();
 }
 onlineNameInput.oninput=()=>{online.name=onlineValidName(onlineNameInput.value);};
@@ -1147,6 +1216,7 @@ function onlineBeginSession(){
   const old=online.peer;
   online.peer=null;online.conn=null;online.people.clear();
   online.inMatch=false;online.mode='off';online.latestRoom=null;online.myIndex=0;
+  online.ping=null;online.lastPingSent=0;onlineSmooth.active=false;
   onlineIndicator.style.display='none';
   if(old&&!old.destroyed){try{old.destroy();}catch(_){}}
 }
@@ -1176,7 +1246,7 @@ function onlineRandomCode(){
 function onlinePeerId(code){return 'ebr-v39-'+code.toLowerCase();}
 function onlineStartProfile(){
   online.name=onlineValidName(onlineNameInput.value)||((lang==='en'?englishNames:names)[Math.floor(Math.random()*(lang==='en'?englishNames:names).length)]);
-  onlineLobbyNameInput.value=online.name;
+  onlineNameInput.value=online.name;
 }
 function onlineFail(message){
   onlineBeginSession();onlineShow('onlineHome');onlineNotice(message,true);
@@ -1215,11 +1285,14 @@ function onlineCreateRoom(){
       if(generation!==online.generation||!onlineIsHost())return;
       const person=online.people.get(conn.peer);
       if(!person||!message||typeof message!=='object')return;
-      if(message.t==='hello'||message.t==='profile'){
+      if(message.t==='hello'){
         if(online.inMatch)return;
         person.name=onlineValidName(message.name)||('Guest '+person.seat);
         person.ability=Number.isInteger(message.ability)?Math.max(0,Math.min(3,message.ability)):0;
         onlinePublishLobby();return;
+      }
+      if(message.t==='ping'&&Number.isFinite(message.sentAt)){
+        conn.send({t:'pong',sentAt:message.sentAt});return;
       }
       if(!online.inMatch||person.seat!==current||!human(activePlayer())||!activePlayer().alive)return;
       if(message.turn!==turnNo)return;
@@ -1300,6 +1373,10 @@ function onlineJoinRoom(){
         online.myIndex=message.you;online.inMatch=true;onlineApplyState(message.state,true);
         onlineShow(null);onlineRefreshText();return;
       }
+      if(message.t==='pong'&&Number.isFinite(message.sentAt)){
+        online.ping=Math.max(0,Math.round(performance.now()-message.sentAt));
+        onlineUpdateIndicator();return;
+      }
       if(message.t==='state'&&online.inMatch)onlineApplyState(message.state,false);
     });
     conn.on('close',()=>{if(generation===online.generation)onlineFail(onlineMsg('ホストとの通信が切断されました。','Disconnected from host.'));});
@@ -1355,11 +1432,18 @@ function onlineRenderLobby(){
     el.append(title,desc);root.append(el);
   }
   document.getElementById('onlineRoomCode').textContent=online.code;
+  document.getElementById('onlineProfileSummary').textContent=onlineMsg('あなたの設定：','Your setup: ')+
+    ' '+(online.myIndex+1)+'P · '+(online.name||'—')+' · '+abilities[online.ability].icon+' '+tr(abilities[online.ability].name);
   document.getElementById('onlineHostOptions').hidden=!onlineIsHost();
+  document.getElementById('onlineHostStart').hidden=!onlineIsHost();
+  document.getElementById('onlineStageNote').hidden=onlineIsHost();
   document.getElementById('onlineCpuCount').textContent=room.cpuCount;
   document.getElementById('cpuPlus').disabled=!onlineIsHost()||room.seats.filter(s=>s.kind!=='cpu'&&s.kind!=='empty').length+online.cpuCount>=4;
   document.getElementById('cpuMinus').disabled=!onlineIsHost()||online.cpuCount<=0;
-  document.getElementById('onlineStage').value=String(room.stage);
+  document.querySelectorAll('[data-online-stage]').forEach(b=>{
+    b.classList.toggle('chosen',Number(b.dataset.onlineStage)===room.stage);
+    b.disabled=!onlineIsHost();
+  });
   document.getElementById('onlineStart').disabled=room.seats.filter(s=>s.kind!=='empty').length<2;
   const cpuInputs=document.getElementById('onlineCpuNames');cpuInputs.replaceChildren();
   if(onlineIsHost()){
@@ -1375,7 +1459,6 @@ function onlineRenderLobby(){
   onlineLobbyStatus.textContent=onlineIsHost()
     ?onlineMsg('全員が参加したら「対戦スタート！」を押してください。','Press Start Battle once everyone has joined.')
     :onlineMsg('ホストの対戦開始を待っています。','Waiting for the host to start the match.');
-  if(document.activeElement!==onlineLobbyNameInput)onlineLobbyNameInput.value=online.name;
 }
 function onlineCaptureState(){
   return {stage,erasers:erasers.map(e=>({...e})),turnOrder:[...turnOrder],turnIndex,current,phase,
@@ -1388,13 +1471,14 @@ function onlineBroadcastState(){
 function onlineApplyState(s,start){
   if(!s||!Array.isArray(s.erasers)||s.erasers.length<2||s.erasers.length>4)return;
   if(start||stage!==s.stage){stage=s.stage;resize();boardCacheValid=false;}
+  onlineRememberPositions(s.erasers,!!start);
   erasers=s.erasers;turnOrder=s.turnOrder||[];turnIndex=s.turnIndex;current=s.current;
   phase=s.phase;turnNo=s.turnNo;falls=s.falls||[];fx=s.fx||[];
   frozenPower=s.frozenPower;timeStop=s.timeStop;satokeTimer=s.satokeTimer;
   hitstop=s.hitstop;kingShotPending=s.kingShotPending;
   winner=erasers.find(e=>e.id===s.winnerId)||null;
   onlineIndicator.style.display='block';
-  onlineIndicator.textContent='● ONLINE  ·  '+(online.myIndex+1)+'P  ·  '+(online.code||'');
+  onlineUpdateIndicator();
   document.getElementById('endActions').style.display=phase==='finished'?'flex':'none';
   skip.style.display='none';
   if(phase==='finished'){
@@ -1426,7 +1510,7 @@ function onlineHostStart(){
   init(seats.length-1,online.stage);
   onlineShow(null);
   onlineIndicator.style.display='block';
-  onlineIndicator.textContent='● ONLINE  ·  1P  ·  '+online.code;
+  onlineUpdateIndicator();
   document.getElementById('changeCount').textContent=onlineMsg('⚙ ルームへ戻る','⚙ Back to Room');
   again.disabled=false;again.style.opacity='1';again.textContent=tr('↻ もう一度遊ぶ');
   const state=onlineCaptureState();
@@ -1454,19 +1538,12 @@ document.getElementById('onlineLeave').onclick=onlineLeave;
 document.getElementById('onlineAbility').onclick=()=>{
   online.ability=(online.ability+1)%4;onlineRefreshText();
 };
-onlineLobbyNameInput.oninput=()=>{
-  online.name=onlineValidName(onlineLobbyNameInput.value);
-  if(onlineIsHost())onlinePublishLobby();
-  else onlineSend({t:'profile',name:online.name,ability:online.ability});
-};
-document.getElementById('onlineLobbyAbility').onclick=()=>{
-  online.ability=(online.ability+1)%4;onlineRefreshText();
-  if(onlineIsHost())onlinePublishLobby();
-  else onlineSend({t:'profile',name:online.name,ability:online.ability});
-};
 document.getElementById('cpuMinus').onclick=()=>{online.cpuCount=Math.max(0,online.cpuCount-1);onlinePublishLobby();};
 document.getElementById('cpuPlus').onclick=()=>{online.cpuCount=Math.min(3-online.people.size,online.cpuCount+1);onlinePublishLobby();};
-document.getElementById('onlineStage').onchange=e=>{online.stage=Number(e.target.value);onlinePublishLobby();};
+document.querySelectorAll('[data-online-stage]').forEach(b=>b.onclick=()=>{
+  if(!onlineIsHost()||online.inMatch)return;
+  online.stage=Number(b.dataset.onlineStage);onlinePublishLobby();
+});
 document.getElementById('onlineStart').onclick=onlineHostStart;
 document.getElementById('copyRoom').onclick=async()=>{
   const url=new URL(location.href);url.searchParams.set('room',online.code);
