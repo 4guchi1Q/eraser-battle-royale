@@ -160,7 +160,12 @@
   .onlineChoiceGrid .onlineFlowStep .onlineStepHint{flex:1}
   .panel .onlineChoiceGrid button{font-size:15px;margin:3px 0 0;padding:11px 8px}
   .panel .onlineFlowStep .onlineFields{margin:10px 0 6px}
+  #onlineHome .onlineFields{grid-template-columns:minmax(0,1fr);max-width:430px}
   .onlineProfileSummary{text-align:left;background:#e4f3fa;border:2px solid #86b5ce;border-radius:9px;padding:11px 14px;font-size:13px;font-weight:800;margin:10px 0;overflow-wrap:anywhere}
+  .onlineAbilityRow{display:flex;align-items:center;gap:12px;justify-content:space-between;text-align:left;padding:12px;background:#fff9e9;border:2px solid #c8b694;border-radius:10px;margin:10px 0}
+  .onlineAbilityRow strong{display:block;font-size:14px}
+  .onlineAbilityRow small{display:block;margin-top:4px;font-size:11px;color:#705e42;line-height:1.4}
+  .panel .onlineAbilityRow button{width:min(225px,52%);margin:0;padding:10px 8px;font-size:14px;background:#e4f0fa;border-color:#538aa8}
   #onlineStageChoices{margin-bottom:10px}
   #onlineStageChoices button:disabled{opacity:.76;cursor:default}
   #onlineStageChoices button.chosen:disabled{opacity:1}
@@ -196,8 +201,8 @@
 <noscript><div style="position:fixed;inset:0;z-index:100;background:#222;color:#fff;padding:30px;font-size:18px">このゲームにはJavaScriptが必要です。</div></noscript>
 <section class="overlay" id="menu"><div class="panel"><div class="crown">♛</div><h1>消しゴム<br><em>バトルロイヤル</em></h1><div class="english">ERASER BATTLE ROYALE</div><button id="mode">▶ ローカル対戦</button><button id="onlineMode">🌐 オンライン対戦</button><button class="secondary" id="langSwitch" style="font-size:14px">日本語 / English</button><button class="secondary" id="rulesBtn">▤ ルール説明</button></div></section>
 <section class="overlay" id="onlineHome" hidden><div class="panel"><h2>🌐 オンライン対戦</h2><div class="menuSubtitle">友達とルームコードで対戦。1端末につき1人、最大4人。</div>
-  <div class="onlineFlowStep"><div class="onlineStepTitle">STEP 1 · プレイヤー設定</div><div class="onlineStepHint">先に名前と能力を決めてください。作成・参加後の対戦中は変更できません。</div>
-    <div class="onlineFields"><label>自分の名前<input id="onlineName" maxlength="16" placeholder="名前（空欄でおまかせ）"></label><label>自分の能力<button type="button" id="onlineAbility">🚫 能力なし ↻</button></label></div>
+  <div class="onlineFlowStep"><div class="onlineStepTitle">STEP 1 · 名前設定</div><div class="onlineStepHint">先に名前を決めてください。能力はルームに入ってから選べます。</div>
+    <div class="onlineFields"><label>自分の名前<input id="onlineName" maxlength="16" placeholder="名前（空欄でおまかせ）"></label></div>
     <div class="onlineStepHint">※名前が空欄の場合はランダムで決まります。</div>
   </div>
   <div class="onlineChoiceGrid">
@@ -208,6 +213,7 @@
 </div></section>
 <section class="overlay" id="onlineLobby" hidden><div class="panel"><h2>⚡ オンラインルーム</h2><div id="onlineRoomCode" class="roomCode">────────</div><button id="copyRoom">🔗 招待リンクをコピー</button><div id="onlineLobbyStatus" class="onlineNotice" role="status"></div>
   <div class="onlineProfileSummary" id="onlineProfileSummary"></div>
+  <div class="onlineAbilityRow"><div><strong>自分の能力</strong><small>対戦開始前なら何度でも変更できます</small></div><button type="button" id="onlineLobbyAbility">🚫 能力なし ↻</button></div>
   <div id="onlineRoster"></div><div id="onlineHostOptions"><div class="onlineOptions"><strong>CPUを追加</strong><button type="button" id="cpuMinus">－</button><b id="onlineCpuCount">0</b><button type="button" id="cpuPlus">＋</button></div><div id="onlineCpuNames"></div></div>
   <strong class="stageLabel">▣ ステージ選択</strong><div id="onlineStageChoices" class="stageChoices">
     <button data-online-stage="0" class="chosen"><span class="stageThumb thumb0"></span><span>おわりのコロシアム<small>シンプルな木の机</small></span></button>
@@ -269,8 +275,9 @@ const translations={
 '→ ルームに参加':'→ Join Room','⌂ タイトルに戻る':'⌂ Back to Title','⚡ オンラインルーム':'⚡ Online Room',
 '🔗 招待リンクをコピー':'🔗 Copy Invite Link','CPUを追加':'Add CPUs','ステージ':'Stage','← ルームから退出':'← Leave Room'
 ,'オンライン対戦では、1端末につき1人が参加。ルームコードで友達を招待し、自分のターンに操作します。ホストがステージとCPUを決めます。':'For online play, one player joins per device. Invite friends with a room code and play on your own turn. The host chooses the stage and CPUs.'
-,'STEP 1 · プレイヤー設定':'STEP 1 · Player Setup'
-,'先に名前と能力を決めてください。作成・参加後の対戦中は変更できません。':'Choose your name and ability first. They cannot be changed during the match.'
+,'STEP 1 · 名前設定':'STEP 1 · Choose Name'
+,'先に名前を決めてください。能力はルームに入ってから選べます。':'Choose your name first. You can choose your ability after joining a room.'
+,'対戦開始前なら何度でも変更できます':'Change freely before the match starts.'
 ,'※名前が空欄の場合はランダムで決まります。':'Leave the name blank to get a random one.'
 ,'STEP 2-A · ルームを作る':'STEP 2-A · Create Room'
 ,'ホストとしてルームを作り、友達にコードを送ります。':'Create a room as the host and send its code to friends.'
@@ -1204,7 +1211,7 @@ function onlineShow(which){
 }
 function onlineRefreshText(){
   const abilityText=abilities[online.ability].icon+' '+tr(abilities[online.ability].name)+' ↻';
-  document.getElementById('onlineAbility').textContent=abilityText;
+  document.getElementById('onlineLobbyAbility').textContent=abilityText;
   onlineNameInput.placeholder=onlineMsg('名前（空欄でおまかせ）','Name (random if blank)');
   if(document.activeElement!==onlineNameInput)onlineNameInput.value=online.name;
   if(online.mode!=='off')onlineRenderLobby();
@@ -1289,6 +1296,12 @@ function onlineCreateRoom(){
         if(online.inMatch)return;
         person.name=onlineValidName(message.name)||('Guest '+person.seat);
         person.ability=Number.isInteger(message.ability)?Math.max(0,Math.min(3,message.ability)):0;
+        onlinePublishLobby();return;
+      }
+      if(message.t==='abilityChoice'){
+        if(online.inMatch)return;
+        if(!Number.isInteger(message.ability)||message.ability<0||message.ability>=abilities.length)return;
+        person.ability=message.ability;
         onlinePublishLobby();return;
       }
       if(message.t==='ping'&&Number.isFinite(message.sentAt)){
@@ -1434,6 +1447,8 @@ function onlineRenderLobby(){
   document.getElementById('onlineRoomCode').textContent=online.code;
   document.getElementById('onlineProfileSummary').textContent=onlineMsg('あなたの設定：','Your setup: ')+
     ' '+(online.myIndex+1)+'P · '+(online.name||'—')+' · '+abilities[online.ability].icon+' '+tr(abilities[online.ability].name);
+  document.getElementById('onlineLobbyAbility').textContent=abilities[online.ability].icon+' '+tr(abilities[online.ability].name)+' ↻';
+  document.getElementById('onlineLobbyAbility').disabled=online.inMatch;
   document.getElementById('onlineHostOptions').hidden=!onlineIsHost();
   document.getElementById('onlineHostStart').hidden=!onlineIsHost();
   document.getElementById('onlineStageNote').hidden=onlineIsHost();
@@ -1535,8 +1550,11 @@ document.getElementById('createRoom').onclick=onlineCreateRoom;
 document.getElementById('joinRoom').onclick=onlineJoinRoom;
 document.getElementById('joinCode').addEventListener('keydown',e=>{if(e.key==='Enter')onlineJoinRoom();});
 document.getElementById('onlineLeave').onclick=onlineLeave;
-document.getElementById('onlineAbility').onclick=()=>{
-  online.ability=(online.ability+1)%4;onlineRefreshText();
+document.getElementById('onlineLobbyAbility').onclick=()=>{
+  if(online.mode==='off'||online.inMatch||onlineLobbyEl.hidden)return;
+  online.ability=(online.ability+1)%abilities.length;
+  if(onlineIsHost())onlinePublishLobby();
+  else{onlineSend({t:'abilityChoice',ability:online.ability});onlineRenderLobby();}
 };
 document.getElementById('cpuMinus').onclick=()=>{online.cpuCount=Math.max(0,online.cpuCount-1);onlinePublishLobby();};
 document.getElementById('cpuPlus').onclick=()=>{online.cpuCount=Math.min(3-online.people.size,online.cpuCount+1);onlinePublishLobby();};
